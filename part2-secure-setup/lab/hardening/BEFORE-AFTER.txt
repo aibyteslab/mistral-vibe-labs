@@ -1,0 +1,7 @@
+                     DEFAULT 3.0.1            HARDENED
+default agent        accept-edits             ask
+read .env / keys     asks                     never (deny list)
+shell cat .env       cat is allow-listed      denied (deny list + hook)
+--yolo               available                blocked (admin config)
+untrusted repo       ignored until trusted    explicitly not trusted
+API key              OS keyring               keyring, nothing exported

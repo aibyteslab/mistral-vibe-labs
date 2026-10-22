@@ -1,0 +1,4 @@
+AGENTS.md        -> the request   (rules the model should follow)
+config.toml      -> the lock      (what Vibe lets tools do)
+trusted folders  -> the gate      (which projects may change the rules)
+admin config     -> distribution  (team defaults, fail-open)

@@ -1,0 +1,3 @@
+# Distribution, not a security control (Mistral docs). Fail-open if the fetch fails.
+enable_auto_approve = false
+enable_mcp = false

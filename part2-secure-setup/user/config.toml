@@ -1,0 +1,75 @@
+# Mistral Vibe 3.0.1 - AI Bytes Lab security profile (lab VM)
+# Layers: AGENTS.md = request, this file = lock, trusted folders = gate,
+# admin config = team distribution. None of these is a sandbox.
+# Unknown keys are ignored silently, and /config lists no [tools.*]
+# sections: test each block with a prompt.
+
+# Pre-seed: on first start 3.0.1 runs migration bash_read_only_defaults_v1,
+# which merges read-only commands (cat, head, ...) into the bash allowlist.
+# Listing it as applied keeps the allowlist exactly as written below.
+applied_migrations = ["bash_read_only_defaults_v1"]
+
+default_agent = "ask"
+disabled_agents = ["auto-approve"]
+enable_telemetry = false
+enable_background_processes = false
+
+# enable_auto_approve = false would block --yolo here too; it is left to
+# admin config so chapter 5 can show it (see admin/managed-config.toml).
+# Tested 3.0.1: --yolo skips prompts AND the deny lists below; only the
+# pre_tool hook still fires. Deny lists are not a control under --yolo.
+
+# Read-only file tool: allowed, but never on secrets.
+# denylist = globs matched against absolute paths, always denied.
+# Note: "*/.env.*" also blocks the harmless .env.example.
+[tools.read_file]
+permission = "always"
+denylist = ["*/.env", "*/.env.*", "*/.envrc", "*/.ssh/*", "*/.gnupg/*",
+            "*.pem", "*.key", "*_rsa", "*_ed25519", "*_ecdsa",
+            "/etc/shadow"]
+
+# grep, web_fetch, web_search: not tool names in the 3.0.1 unified harness
+# (it uses file_system.* and connector_web_search.*), so these blocks are
+# inert there. Kept for older harnesses.
+[tools.grep]
+permission = "ask"
+
+# File changes: always ask; never touch Vibe's own config, keys or profiles.
+[tools.write_file]
+permission = "ask"
+denylist = ["*/.vibe/*", "*/.ssh/*", "*/.gnupg/*", "*/.bashrc", "*/.zshrc",
+            "*/.profile", "*/.git/hooks/*", "/etc/*"]
+
+[tools.edit]
+permission = "ask"
+denylist = ["*/.vibe/*", "*/.ssh/*", "*/.gnupg/*", "*/.bashrc", "*/.zshrc",
+            "*/.profile", "*/.git/hooks/*", "/etc/*"]
+
+# Shell. Denylist beats allowlist (tested: a command in both is denied).
+# The default interactive-command denylist is repeated so it stays in force.
+[tools.bash]
+permission = "ask"
+allowlist = ["ls", "pwd", "git status"]
+denylist = [
+  # interactive (replaces the default denylist)
+  "gdb", "pdb", "passwd", "nano", "vim", "vi", "emacs",
+  "bash -i", "sh -i", "zsh -i", "fish -i", "dash -i", "screen", "tmux",
+  # destructive
+  "rm -rf", "dd", "mkfs", "shred", "wipefs", "fdisk", "parted",
+  "shutdown", "reboot", "poweroff", "halt",
+  # network and environment
+  "curl", "wget", "nc", "ncat", "printenv", "env",
+  # content printers (lab policy; loosen for real projects)
+  "cat", "head", "tail", "less", "more", "nl", "tac", "strings",
+  "xxd", "od", "base64", "grep", "rg", "awk", "sed", "find",
+]
+
+# README: cron is "enabled and allowed by default"; tools.cron.permission applies.
+[tools.cron]
+permission = "ask"
+
+[tools.web_fetch]
+permission = "ask"
+
+[tools.web_search]
+permission = "ask"

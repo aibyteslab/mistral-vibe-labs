@@ -1,0 +1,8 @@
+[[hooks]]
+name = "deny-secret-reads"
+type = "pre_tool"
+match = "re:bash.*|process_start"
+command = "python3 /home/aibyteslab/.vibe/hooks/deny-secret-reads.py"
+timeout = 10.0
+strict = true
+description = "Refuse shell commands that name secret files."
